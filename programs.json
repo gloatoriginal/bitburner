@@ -1,0 +1,20 @@
+[
+  {
+    "name": "worm-stable",
+    "threads": 3,
+    "description": "Worm meant to travel through nodes",
+    "enabled": 1
+  },
+  {
+    "name": "hacknet",
+    "threads": 1,
+    "description": "Hacknet autobuying script",
+    "enabled": 1
+  },
+  {
+    "name": "worm",
+    "threads": 2,
+    "description": "Worm meant to travel through nodes",
+    "enabled": 0
+  } 
+]
