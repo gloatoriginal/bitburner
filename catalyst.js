@@ -1,8 +1,9 @@
 /** @param {NS} ns */
 export async function main(ns) {
+  ns.killall()
   while (true) {
-    let watchdog_config = await get_config(ns, 'watchdog-config.json')
-    let programs = await get_config(ns, 'programs.json')
+    let watchdog_config = await get_config(ns, 'catalyst.txt')
+    let programs = await get_config(ns, 'programs.txt')
     let disabled_apps = new Array()
     for (let i in programs) {
       let program = programs[i];
@@ -11,8 +12,8 @@ export async function main(ns) {
       if (program.enabled == 1) await async_run(ns, program)
     }
 
-    await ns.sleep(watchdog_config.timeout)
     await kill_rogue_procs(ns, programs, disabled_apps)
+    await ns.sleep(watchdog_config.timeout)
   }
 }
 
@@ -57,16 +58,21 @@ async function kill_rogue_procs(ns, programs) {
     for (let prog of programs) {
       // let prog = programs[j]
       let current_script = await ns.getScriptName()
-      if (proc.filename == prog.name &&
-        proc.filename != current_script) {
-        if (prog.enabled == 0) {
-          pid_kill_list.push(proc.pid)
-        }
+      if (proc.filename != current_script && proc.filename == prog.name && prog.enabled == 0) {
+        await add_kill_list(ns, pid_kill_list, proc.filename, proc.pid) 
       }
     }
   }
   for (let i of pid_kill_list) {
-    ns.print('Killing pid: ' + i)
+    ns.print('Killed pid: ' + i)
     await ns.kill(i)
   }
 }
+
+
+async function add_kill_list(ns, pid_kill_list, filename, procid){
+  ns.print('Killing process: ' + filename)
+  pid_kill_list.push(procid)
+}
+
+
