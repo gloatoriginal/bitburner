@@ -5,15 +5,18 @@ export async function main(ns) {
     let watchdog_config = await get_config(ns, 'catalyst.txt')
     let programs = await get_config(ns, 'programs.txt')
     let disabled_apps = new Array()
+    let enabled_apps = new Array()
     for (let program of programs) {
       //let program = programs[i];
       // ns.print(program.name)
       if (!program.name.includes('.js')) program.name += '.js'
       // TODO: We can collect disabled_apps with an else statement here
-      if (program.enabled == 1) await async_run(ns, program)
-      // else disabled_apps.push(program)
+      if (program.enabled == 1) {
+        await async_run(ns, program)
+        enabled_apps.push(program)
+      } else disabled_apps.push(program)
     }
-    await kill_rogue_procs(ns, programs, disabled_apps)
+    await kill_rogue_procs(ns, programs, disabled_apps, enabled_apps)
 
     await ns.sleep(watchdog_config.timeout)
   }
@@ -51,17 +54,18 @@ async function program_running(ns, name) {
   return false
 }
 
-async function kill_rogue_procs(ns, programs) {
+async function kill_rogue_procs(ns, programs, disabled_apps, enabled_apps) {
   let ps_array = await ns.ps();
-  let disabled = []
-  let enabled = []
-  for(let prog of programs) {
+  //let disabled = []
+  //let enabled = []
+  // Need to pass in enabled/disabled apps list
+  /*for(let prog of programs) {
     if(prog.enabled == 0) disabled.push(prog.name)
     else enabled.push(prog.name)
-  }
+  }*/
   for (let proc of ps_array){
-    if(disabled.includes(proc.filename) ||
-    !enabled.includes(proc.filename)) await kp(ns, proc.pid)
+    if(disabled_apps.includes(proc.filename) ||
+    !enabled_apps.includes(proc.filename)) await kp(ns, proc.pid)
   }
 }
 
