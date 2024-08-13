@@ -5,11 +5,13 @@ export async function main(ns) {
     let watchdog_config = await get_config(ns, 'catalyst.txt')
     let programs = await get_config(ns, 'programs.txt')
     let disabled_apps = new Array()
-    for (let i in programs) {
-      let program = programs[i];
+    for (let program of programs) {
+      //let program = programs[i];
       // ns.print(program.name)
       if (!program.name.includes('.js')) program.name += '.js'
+      // TODO: We can collect disabled_apps with an else statement here
       if (program.enabled == 1) await async_run(ns, program)
+      // else disabled_apps.push(program)
     }
     await kill_rogue_procs(ns, programs, disabled_apps)
 
